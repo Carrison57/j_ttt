@@ -6,6 +6,32 @@ require_relative 'sequential_ai.rb'
 require_relative 'random_ai.rb'
 require_relative 'unbeatable_ai.rb'
 require 'sinatra/reloader' if development?
+require "aws/s3"
+load './local_env.rb' if File.exists?("./local_env.rb")
+
+s3_key = ENV['S3_KEY']
+s3_secret = ENV['S3_SECRET']
+
+AWS::S3::Base.establish_connection!(
+	:access_key_id => s3_key,
+	:secret_access_key => s3_secret
+)
+
+def write_file_to_s3(data_to_write)
+	AWS::S3::S3Object.store('summary.csv',
+		data_to_write,
+		'tictactoe-scores',
+		:acess => :public_read)
+end
+
+
+def read_csv_from_s3
+file = 'summary.csv'
+bucket = 'tictactoe-scores'
+object_from_s3 = AWS::S3::S3Object.value(file, bucket)
+csv = CSV.parse(object_from_s3)
+end
+
 
 # post routes come from the form action
 # params come from form names
@@ -123,6 +149,12 @@ get '/make_move' do
 
 		redirect '/get_move'
 	end	
+end
+
+get '/upload' do
+  winning_results = 'summary.csv'
+  write_file_to_s3(winning_results)
+  redirect '/'
 end
 
 get '/win' do 
