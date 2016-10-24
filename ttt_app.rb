@@ -9,27 +9,20 @@ require 'sinatra/reloader' if development?
 require "aws/s3"
 load './local_env.rb' if File.exists?("./local_env.rb")
 
-s3_key = ENV['S3_KEY']
-s3_secret = ENV['S3_SECRET']
-
-AWS::S3::Base.establish_connection!(
-	:access_key_id => s3_key,
-	:secret_access_key => s3_secret
+def write_file_to_s3(player_1, player_2, winner, date_time)
+	AWS::S3::Base.establish_connection!(
+   	:access_key_id   => ENV['S3_KEY'], 
+ 	:secret_access_key => ENV['S3_SECRET']   
 )
 
-def write_file_to_s3(data_to_write)
-	AWS::S3::S3Object.store('summary.csv',
-		data_to_write,
-		'tictactoe-scores',
-		:acess => :public_read)
-end
-
-
-def read_csv_from_s3
-file = 'summary.csv'
-bucket = 'tictactoe-scores'
-object_from_s3 = AWS::S3::S3Object.value(file, bucket)
-csv = CSV.parse(object_from_s3)
+	file = "summary.csv" 
+	bucket = 'ttt-scores7'
+	csv = AWS::S3::S3Object.value(file, bucket)
+	csv << player_1 + ", " + player_2 + ", " + winner + ", " + date_time.to_s + "\n"
+	AWS::S3::S3Object.store(File.basename(file), 
+        csv, 
+        bucket, 
+        :access => :public_read)
 end
 
 
@@ -126,6 +119,8 @@ get '/make_move' do
 
 		write_to_csv(player_1, player_2, winner, date_time)
 
+		write_file_to_s3(player_1, player_2, winner, date_time)
+
 		erb :win, :locals => { :current_player => session[:current_player], :current_player_name => session[:current_player_name], :board => session[:board].board_positions }
 	elsif session[:board].game_ends_in_tie? == true
 		player_1 = session[:name_player_1]
@@ -172,6 +167,3 @@ end
 def check_file_length()
 	File.readlines("summary.csv").size
 end
-
-# You can do a redirect if you're not using erb 
-# 
