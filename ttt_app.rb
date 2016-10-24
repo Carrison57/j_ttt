@@ -15,7 +15,7 @@ def write_file_to_s3(player_1, player_2, winner, date_time)
  	:secret_access_key => ENV['S3_SECRET']   
 )
 
-	file = "summary.csv" 
+	file = 'summary.csv'
 	bucket = 'ttt-scores7'
 	csv = AWS::S3::S3Object.value(file, bucket)
 	csv << player_1 + ", " + player_2 + ", " + winner + ", " + date_time.to_s + "\n"
@@ -25,9 +25,21 @@ def write_file_to_s3(player_1, player_2, winner, date_time)
         :access => :public_read)
 end
 
+def read_csv_from_s3
+file = 'summary.csv'
+bucket = 'ttt-scores7'
+object_from_s3 = AWS::S3::S3Object.value(file, bucket)
+# csv = CSV.parse(object_from_s3)
+end
 
-# post routes come from the form action
-# params come from form names
+def create_result_array(content)
+	file = content
+	result = file.split("\n")
+	array = Array.new
+	result.each { |x| array.push(x.split(":"))}
+	array
+end
+
 
 enable :sessions
 
@@ -117,7 +129,7 @@ get '/make_move' do
 		winner = session[:current_player_name]
 		date_time = DateTime.now
 
-		write_to_csv(player_1, player_2, winner, date_time)
+		# write_to_csv(player_1, player_2, winner, date_time)
 
 		write_file_to_s3(player_1, player_2, winner, date_time)
 
@@ -128,7 +140,7 @@ get '/make_move' do
 		winner = "Tie"
 		date_time = DateTime.now
 
-		write_to_csv(player_1, player_2, winner, date_time)
+		# write_to_csv(player_1, player_2, winner, date_time)
 
 		erb :tie, :locals => { :board => session[:board].board_positions }
 	else
@@ -146,10 +158,16 @@ get '/make_move' do
 	end	
 end
 
-get '/upload' do
-  winning_results = 'summary.csv'
-  write_file_to_s3(winning_results)
-  redirect '/'
+# get '/upload' do
+#   winning_results = 'summary.csv'
+#   write_file_to_s3(winning_results)
+#   redirect '/'
+# end
+
+get '/update_csv' do
+	names = create_result_array(read_csv_from_s3)
+	names.shift
+	erb :update_csv, :locals => {:names => names, :board => session[:board].board_positions}
 end
 
 get '/win' do 
