@@ -71,3 +71,25 @@ body {
 #board tr td:hover {  
   cursor: pointer;
 }
+
+.marker-attributes {
+  background-color: blue;
+}
+
+.board-att {
+  background: red;
+  font-size: -webkit-xxx-large;
+  border: none;
+}
+
+.marker-color {
+  marker-color option {color:red;}
+}
+
+input[value="X"] {
+  color: red;
+}
+
+input[value="O"] {
+  color: blue;
+}
