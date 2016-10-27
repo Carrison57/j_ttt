@@ -77,13 +77,9 @@ body {
 }
 
 .board-att {
-  background: red;
+  background: white;
   font-size: -webkit-xxx-large;
   border: none;
-}
-
-.marker-color {
-  marker-color option {color:red;}
 }
 
 input[value="X"] {
