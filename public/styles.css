@@ -68,17 +68,13 @@ body {
   text-align: center; 
 }
  
-#board tr td:hover {  
+/*#board tr td:hover {  
   cursor: pointer;
-}
-
-.marker-attributes {
-  background-color: blue;
-}
+}*/
 
 .board-att {
   background: white;
-  font-size: -webkit-xxx-large;
+  font-size: 30px;
   border: none;
 }
 
@@ -88,4 +84,16 @@ input[value="X"] {
 
 input[value="O"] {
   color: blue;
+}
+
+.results-container {
+  width: 50%;
+  margin: 0 auto;
+  text-align: center;
+  margin-top: 1%
+}
+
+.results-header {
+  text-decoration: underline;
+  font-size: large;
 }

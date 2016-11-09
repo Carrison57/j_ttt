@@ -36,7 +36,7 @@ def create_result_array(content)
 	file = content
 	result = file.split("\n")
 	array = Array.new
-	result.each { |x| array.push(x.split(":"))}
+	result.each { |x| array.push(x.split(","))}
 	array
 end
 
@@ -46,16 +46,16 @@ enable :sessions
 get '/' do
 	@title = "Welcome to Tic Tac Toe"
 	session[:board] = Board.new
-	erb :home, :locals => { :board => session[:board].board_positions }
+	erb :home, :layout => :home_static_layout, :locals => { :board => session[:board].board_positions }
 end
 
 post '/game' do
-	session[:name_player_1] = params[:player_1]
+	session[:name_player_1] = params[:player_1].capitalize
 	session[:p1] = Human.new("X")
 	session[:current_player] = session[:p1]
 	session[:current_player_name] = session[:name_player_1]
 
-	erb :opponent, :locals => { :board => session[:board].board_positions }	
+	erb :opponent, :layout => :home_static_layout, :locals => { :board => session[:board].board_positions }	
 end
 
 post '/opponent' do
@@ -64,7 +64,7 @@ post '/opponent' do
 	if player_2 == "human"
 		session[:p2] = Human.new("O")
 
-		erb :opponent_name, :locals => { :board => session[:board].board_positions }
+		erb :opponent_name, :layout => :home_static_layout, :locals => { :board => session[:board].board_positions }
 
 	elsif player_2 == "sequential_ai"
 		session[:p2] = SequentialAI.new("O")
@@ -84,7 +84,7 @@ post '/opponent' do
 	else player_2 == "unbeatable_ai"
 		session[:p2] = UnbeatableAI.new("O")
 
-		erb :get_move, :locals => { :board => session[:board].board_positions }
+		erb :get_move, :locals => { :board => session[:board].board_positions, :current_player_name => session[:current_player_name], :current_player => session[:current_player]}
 		# redirect '/get_move'
 	end
 end
@@ -167,7 +167,7 @@ end
 get '/update_csv' do
 	names = create_result_array(read_csv_from_s3)
 	names.shift
-	erb :update_csv, :locals => {:names => names, :board => session[:board].board_positions}
+	erb :update_csv, :layout => :results_layout, :locals => {:names => names, :board => session[:board].board_positions}
 end
 
 get '/win' do 
